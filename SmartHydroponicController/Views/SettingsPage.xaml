@@ -2,9 +2,32 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="SmartHydroponicController.Views.SettingsPage"
-             Title="Settings">
-    <ContentPage.Content>
-        
-    </ContentPage.Content>
+             x:Class="SmartHydroponicController.Views.SettingsPage">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <VerticalStackLayout >
+            <Label Text="COM Port"/>
+            <Entry Placeholder="Enter COM Port Here"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="1">
+            <Label Text="Baude Rate"/>
+            <Entry Placeholder="Enter Baude Rate Here"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="2">
+            <Label Text="Stop Bits"/>
+            <Entry Placeholder="Enter Stop Bits Here"/>
+        </VerticalStackLayout>
+        <VerticalStackLayout Grid.Row="3">
+            <Label Text="Parity"/>
+            <Entry Placeholder="Enter Parity Here"/>
+        </VerticalStackLayout>
+        <Button Grid.Row="4" Text="Save Settings" />
+    </Grid>
 </ContentPage>

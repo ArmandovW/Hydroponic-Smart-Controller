@@ -68,4 +68,17 @@
         <PackageReference Include="Syncfusion.Maui.Gauges" Version="28.2.9" />
     </ItemGroup>
 
+    <ItemGroup>
+      <MauiXaml Update="Views\GrowthLogPage.xaml">
+        <SubType>Designer</SubType>
+      </MauiXaml>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\GrowthLogPage.xaml.cs">
+        <DependentUpon>GrowthLogPage.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
 </Project>

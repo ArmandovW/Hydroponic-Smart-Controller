@@ -1,3 +1,4 @@
+using SmartHydroponicController.Data;
 using SmartHydroponicController.ViewModels;
 using SmartHydroponicController.Views;
 
@@ -14,9 +15,13 @@ internal static class AppConfig
             client.Timeout = TimeSpan.FromSeconds(30);
             return client;
         });
+        builder.Services.AddSingleton<SQLiteDatabase>();
         
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<DashboardViewModel>();
+        
+        builder.Services.AddTransient<GrowthLogPage>();
+        builder.Services.AddTransient<GrowthLogViewModel>();
 
         builder.Services.AddTransient<PlantProfilePage>();
         builder.Services.AddTransient<PlantProfileViewModel>();

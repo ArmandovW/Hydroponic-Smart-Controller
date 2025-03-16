@@ -15,6 +15,13 @@
                 ContentTemplate="{DataTemplate local:DashboardPage}"
                 Route="MainPage" />
         </Tab>
+        <Tab Title="Growth Log"
+             Icon="log.svg">
+            <ShellContent
+                Title="Log"
+                ContentTemplate="{DataTemplate local:GrowthLogPage}"
+                Route="MainPage" />
+        </Tab>
         <Tab Title="Plant Profiles"
              Icon="seedling.svg">
             <ShellContent

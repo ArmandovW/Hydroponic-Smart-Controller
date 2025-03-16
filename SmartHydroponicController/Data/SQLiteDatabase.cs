@@ -39,6 +39,7 @@ public class SQLiteDatabase
 
         _database = new SQLiteAsyncConnection(_databasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create | SQLiteOpenFlags.SharedCache);
         // Create tables if they don't exist.  This is crucial.
+        await _database.CreateTableAsync<Plant>();
         await _database.CreateTableAsync<PlantProfile>();
         await _database.CreateTableAsync<PlantStatistics>();
     }
@@ -49,9 +50,26 @@ public class SQLiteDatabase
         await Init();
         return await _database.InsertAsync(item);
     }
-
+    
+    // Insert All Plant Profiles
+    public async Task<int> AddPlantsAsync(IEnumerable<Plant> item)
+    {
+        await Init();
+        return await _database.InsertAllAsync(item);
+    }
+    public async Task<int> AddPlantProfilesAsync(IEnumerable<PlantProfile> item)
+    {
+        await Init();
+        return await _database.InsertAllAsync(item);
+    }
+    // Get All Plants
+    public async Task<List<Plant>> GetPlantsAsync()
+    {
+        await Init();
+        return await _database.Table<Plant>().ToListAsync();
+    }
     // Get All Plant Profiles
-    public async Task<List<PlantProfile>> GetPlantProfileAsync()
+    public async Task<List<PlantProfile>> GetPlantProfilesAsync()
     {
         await Init();
         return await _database.Table<PlantProfile>().ToListAsync();

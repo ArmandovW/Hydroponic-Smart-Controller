@@ -3,13 +3,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
-             x:Class="SmartHydroponicController.Views.PlantProfilePage"
-             Title="Plant Profile Page">
+             x:Class="SmartHydroponicController.Views.PlantProfilePage">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Label Text="Select the plant profile you want to grow" HorizontalTextAlignment="Center" FontSize="Large" FontAttributes="Bold"></Label>
             <syncfusion:SfDataGrid Grid.Row="1"
@@ -29,9 +28,32 @@
                                                     MappingName="Description"/>
                 </syncfusion:SfDataGrid.Columns>
             </syncfusion:SfDataGrid>
-            <VerticalStackLayout Grid.Row="2">
-                
+            <VerticalStackLayout Grid.Row="2" VerticalOptions="Start">
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Label Text="Current Set Plant Growth Profile: " HorizontalTextAlignment="Center" FontSize="Large" FontAttributes="Bold"></Label>
+                    <Label Text="{Binding CurrentSetPlantProfile}" HorizontalTextAlignment="Center" TextColor="ForestGreen" FontSize="Large" FontAttributes="Bold"></Label>
+                </HorizontalStackLayout>
+                <syncfusion:SfDataGrid Grid.Row="1"
+                                       ItemsSource="{Binding PlantProfiles}"
+                                       AutoGenerateColumnsMode="None"
+                                       ColumnWidthMode="Auto"
+                                       Margin="20">
+                    <syncfusion:SfDataGrid.Columns>
+                        <syncfusion:DataGridTextColumn HeaderText="Plant ID" Format="0"
+                                                       MappingName="PlantId" Width="150"/>
+                        <syncfusion:DataGridTextColumn  HeaderText="Stage"
+                                                        MappingName="Stage"/>
+                        <syncfusion:DataGridTextColumn  HeaderText="Stage Duration(Days)"
+                                                        MappingName="StageDurationDays"/>
+                        <syncfusion:DataGridTextColumn  HeaderText="Dosing Minutes"
+                                                        MappingName="WateringScheduleDailyDosingMinutes"/>
+                        <syncfusion:DataGridTextColumn  HeaderText="Water Cycles"
+                                                        MappingName="WateringScheduleDailyCycle"/>
+                        <syncfusion:DataGridTextColumn  HeaderText="Notes"
+                                                        MappingName="Notes"
+                                                        ColumnWidthMode="FitByCell"/>
+                    </syncfusion:SfDataGrid.Columns>
+                </syncfusion:SfDataGrid>
             </VerticalStackLayout>
-                
         </Grid>
 </ContentPage>

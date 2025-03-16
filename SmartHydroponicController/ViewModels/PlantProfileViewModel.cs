@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
 using Syncfusion.Maui.DataGrid;
 using Syncfusion.Maui.DataSource.Extensions;
@@ -9,16 +10,23 @@ namespace SmartHydroponicController.ViewModels;
 
 public partial class PlantProfileViewModel : ObservableObject
 {
+    private readonly SQLiteDatabase _db;
     [ObservableProperty]
     ObservableCollection<PlantProfile> plantProfiles = new ObservableCollection<PlantProfile>();
     [ObservableProperty]
     ObservableCollection<Plant> plantToGrow = new ObservableCollection<Plant>();
-    public PlantProfileViewModel()
+
+    [ObservableProperty] private string currentSetPlantProfile;
+    public PlantProfileViewModel(SQLiteDatabase database)
     {
-        LoadData();
+        _db = database;
+        MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            await LoadData();
+        });
     }
 
-    private void LoadData()
+    private async Task LoadData()
     {
         PlantToGrow.Clear();
         PlantToGrow = new ObservableCollection<Plant>()
@@ -36,13 +44,66 @@ public partial class PlantProfileViewModel : ObservableObject
                 Description = "A tomato is a juicy, tangy fruit with a smooth skin and a rich, vibrant color, commonly red, that ranges in flavor from sweet to savory."
             }
         };
+        var plants = await _db.GetPlantsAsync();
+        if (plants.Count() == 0) await _db.AddPlantsAsync(PlantToGrow);
+        var currentSetProfiles = await _db.GetPlantProfilesAsync();
+        if (currentSetProfiles.Count() > 0)
+        {
+            var plantId = currentSetProfiles.First().PlantId;
+            CurrentSetPlantProfile = PlantToGrow.Where(x => x.PlantId == plantId).FirstOrDefault().PlantName;
+            PlantProfiles = currentSetProfiles.ToObservableCollection();
+        }
+        else
+            CurrentSetPlantProfile = "No Profile Set";
     }
     
     [RelayCommand]
-    public void SelectPlantToGrow(DataGridCellTappedEventArgs args)
+    public async Task SelectPlantToGrow(DataGridCellTappedEventArgs args)
     {
         var plant = args.RowData as Plant;
-        
+        if (plant == null) return;
+        var pp = await _db.GetPlantProfilesAsync();
+        if (CurrentSetPlantProfile == "No Profile Set")
+        {
+            await SetPlantProfile(plant.PlantId);
+            return;
+        }
+        else if (pp.Count() > 0 && pp.FirstOrDefault().PlantId != plant.PlantId)
+        {
+            var response = await Application.Current.MainPage.DisplayAlert("Set New Plant Profile?", $"Do you want to set {plant.PlantName} as your new plant profile?", "Yes", "No");
+            if (response)
+            {
+                await _db.ClearAllDatabaseTables();
+                await SetPlantProfile(plant.PlantId);
+            }
+            else
+            {
+                return;
+            }
+        }
+        return;
+    }
+
+    private async Task SetPlantProfile(int plantId)
+    {
+        switch (plantId)
+        {
+            case 1:
+                PlantProfiles = ButterLettuceProfiles().ToObservableCollection();
+                break;
+            case 2:
+                PlantProfiles = TomatoProfiles().ToObservableCollection();
+                break;
+        }
+
+        foreach (var item in PlantProfiles)
+        {
+            item.PlantId = plantId;
+        }
+        await _db.AddPlantProfilesAsync(PlantProfiles);
+        CurrentSetPlantProfile = PlantToGrow.Where(x => x.PlantId == plantId).FirstOrDefault().PlantName;
+        await Application.Current.MainPage.DisplayAlert("Plant Profile Set Success",
+            $"Your new plant profile of {CurrentSetPlantProfile} has successfully been set.", "Ok");
         return;
     }
     public List<PlantProfile> ButterLettuceProfiles()
