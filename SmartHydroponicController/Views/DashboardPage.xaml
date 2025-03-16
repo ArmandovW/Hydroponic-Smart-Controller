@@ -58,8 +58,7 @@
         <Label Grid.Column="1" Grid.Row="1" Margin="10" HorizontalTextAlignment="Center" Text="Plant Health" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
         <Image Grid.Row="2"
                Grid.Column="1" 
-               Source="bad"
-               ></Image>
+               Source="excellent"></Image>
         <Label Grid.Row="3" Grid.Column="1" Margin="10" HorizontalTextAlignment="Center" Text="Your lettuce is very healthy!" FontFamily="Cooper" FontSize="16" />
         
         <Label Grid.Row="3" Grid.Column="0" Margin="10" HorizontalTextAlignment="Center" Text="PH" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>

@@ -2,9 +2,36 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
              x:Class="SmartHydroponicController.Views.PlantProfilePage"
              Title="Plant Profile Page">
-    <ContentPage.Content>
-        
-    </ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Text="Select the plant profile you want to grow" HorizontalTextAlignment="Center" FontSize="Large" FontAttributes="Bold"></Label>
+            <syncfusion:SfDataGrid Grid.Row="1"
+                ItemsSource="{Binding PlantToGrow}"
+                ColumnWidthMode="Auto"
+                SelectionMode="Single"
+                SelectionUnit="Row"
+                Margin="20"
+                HorizontalScrollBarVisibility="Always"
+                CellTappedCommand="{Binding SelectPlantToGrowCommand}">
+                <syncfusion:SfDataGrid.Columns>
+                    <syncfusion:DataGridTextColumn HeaderText="Plant ID" Format="0"
+                                                   MappingName="PlantId"/>
+                    <syncfusion:DataGridTextColumn  HeaderText="Name"
+                                                    MappingName="PlantName"/>
+                    <syncfusion:DataGridTextColumn  HeaderText="Description"
+                                                    MappingName="Description"/>
+                </syncfusion:SfDataGrid.Columns>
+            </syncfusion:SfDataGrid>
+            <VerticalStackLayout Grid.Row="2">
+                
+            </VerticalStackLayout>
+                
+        </Grid>
 </ContentPage>
