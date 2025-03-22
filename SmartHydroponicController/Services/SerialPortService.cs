@@ -13,7 +13,7 @@ public class SerialPortService
     {
         try
         {
-            
+            OpenPort("COM3", 9600);
         }
         catch (Exception e)
         {
