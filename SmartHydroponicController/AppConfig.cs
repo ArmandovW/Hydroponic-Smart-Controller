@@ -1,4 +1,5 @@
 using SmartHydroponicController.Data;
+using SmartHydroponicController.Services;
 using SmartHydroponicController.ViewModels;
 using SmartHydroponicController.Views;
 
@@ -16,6 +17,7 @@ internal static class AppConfig
             return client;
         });
         builder.Services.AddSingleton<SQLiteDatabase>();
+        builder.Services.AddSingleton<SerialPortService>();
         
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<DashboardViewModel>();

@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
         <VerticalStackLayout >
             <Label Text="COM Port"/>
-            <Entry Placeholder="Enter COM Port Here"/>
+            <Picker ItemsSource="{Binding SerialPortNames}"></Picker>
         </VerticalStackLayout>
         <VerticalStackLayout Grid.Row="1">
             <Label Text="Baude Rate"/>

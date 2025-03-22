@@ -1,22 +1,34 @@
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SmartHydroponicController.Data;
+using SmartHydroponicController.Services;
 
 namespace SmartHydroponicController.ViewModels;
 
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly SQLiteDatabase _db;
+    private readonly SerialPortService _serialService;
+    
     [ObservableProperty] public string currentSetPlantProfile;
     [ObservableProperty] public string plantHealthStatus;
-    public DashboardViewModel(SQLiteDatabase database)
+    [ObservableProperty] public string dataReadings;
+    public DashboardViewModel(SQLiteDatabase database, SerialPortService serialPortService)
     {
         _db = database;
+        _serialService = serialPortService;
+        _serialService.DataReceived += SerialServiceOnDataReceived;
         MainThread.InvokeOnMainThreadAsync(async () =>
         {
             await LoadDataAsync();
             PlantHealthStatus = "excellent";
         });
+    }
+
+    private void SerialServiceOnDataReceived(object? sender, string data)
+    {
+        DataReadings = data;
     }
 
     private async Task LoadDataAsync()
