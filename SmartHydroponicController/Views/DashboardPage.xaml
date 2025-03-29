@@ -55,11 +55,26 @@
                 Margin="20,10,20,0">
             <chart:SfCartesianChart Margin="20">                            
                 <chart:SfCartesianChart.XAxes>
-                    <chart:CategoryAxis/>
+                    <chart:CategoryAxis>
+                        <chart:CategoryAxis.Title>
+                            <chart:ChartAxisTitle Text="Water Temprature"/>
+                        </chart:CategoryAxis.Title>
+                    </chart:CategoryAxis>
                 </chart:SfCartesianChart.XAxes>
                 <chart:SfCartesianChart.YAxes>
-                    <chart:NumericalAxis/>
-                </chart:SfCartesianChart.YAxes>                       
+                    <chart:NumericalAxis>
+                        <chart:NumericalAxis.Title>
+                            <chart:ChartAxisTitle Text="Celcius"/>
+                        </chart:NumericalAxis.Title>
+                    </chart:NumericalAxis>
+                </chart:SfCartesianChart.YAxes>
+                <chart:ColumnSeries ItemsSource="{Binding WaterTemprature}"
+                                    XBindingPath="Range"
+                                    YBindingPath="Temprature"
+                                    EnableTooltip="True"
+                                    ShowDataLabels="True"
+                                    Label="Temprature"
+                                    PaletteBrushes="{Binding CustomBrushes}"/>
             </chart:SfCartesianChart>
         </Border>
         <Label Grid.Column="1" Grid.Row="1" Margin="10" HorizontalTextAlignment="Center" Text="Plant Health" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
