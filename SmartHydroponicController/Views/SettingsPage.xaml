@@ -3,31 +3,29 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="SmartHydroponicController.Views.SettingsPage">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <VerticalStackLayout >
-            <Label Text="COM Port"/>
-            <Picker ItemsSource="{Binding SerialPortNames}"></Picker>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Row="1">
-            <Label Text="Baude Rate"/>
-            <Entry Placeholder="Enter Baude Rate Here"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Row="2">
-            <Label Text="Stop Bits"/>
-            <Entry Placeholder="Enter Stop Bits Here"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Row="3">
-            <Label Text="Parity"/>
-            <Entry Placeholder="Enter Parity Here"/>
-        </VerticalStackLayout>
-        <Button Grid.Row="4" Text="Save Settings" />
-    </Grid>
+	<Grid Margin="20">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<VerticalStackLayout >
+			<Label Text="COM Port"/>
+			<Picker ItemsSource="{Binding SerialPortNames}" 
+										SelectedItem="{Binding ComSettings.PortName}">
+			</Picker>
+		</VerticalStackLayout>
+		<VerticalStackLayout Grid.Row="1">
+			<Label Text="Baude Rate"/>
+			<Entry Placeholder="Enter Baude Rate Here" Text="{Binding ComSettings.BaudeRate}"/>
+		</VerticalStackLayout>
+		<VerticalStackLayout Grid.Row="2">
+			<Label Text="Data Bits"/>
+			<Entry Placeholder="Enter Stop Bits Here" Text="{Binding ComSettings.DataBits}"/>
+		</VerticalStackLayout>
+		<Button Grid.Row="4" Text="Save Settings" Command="{Binding SaveSettingsCommand}"/>
+	</Grid>
 </ContentPage>
