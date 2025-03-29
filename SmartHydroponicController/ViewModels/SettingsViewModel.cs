@@ -21,6 +21,13 @@ public partial class SettingsViewModel : ObservableObject
 		_serialService = serialPortService;
 		SerialPortNames = _serialService.GetPorts();
 		ComSettings = new Settings();
+		Task.Run(async () => await LoadSettings());
+	}
+
+	private async Task LoadSettings()
+	{
+		var settings = await _db.GetSettingsAsync();
+		ComSettings = settings;
 	}
 	[RelayCommand]
 	public async Task SaveSettings()
