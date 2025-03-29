@@ -6,154 +6,168 @@
              xmlns:gauge="clr-namespace:Syncfusion.Maui.Gauges;assembly=Syncfusion.Maui.Gauges"
              x:Class="SmartHydroponicController.Views.DashboardPage"
              Title="Hydroponic Farm Dashboard">
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="*" />
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*" />
-			<ColumnDefinition Width="*" />
-			<ColumnDefinition Width="*" />
-		</Grid.ColumnDefinitions>
-		<HorizontalStackLayout Grid.Row="0" 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <HorizontalStackLayout Grid.Row="0" 
                                Grid.Column="0"
                                Grid.ColumnSpan="3" 
                                HorizontalOptions="Center"
                                Margin="10">
-			<Label 
+            <Label 
                 Text="Plant Profile: " 
                 FontFamily="Cooper" 
                 FontSize="Medium"
                 TextColor="Black"
                 FontAttributes="Bold"
                 VerticalTextAlignment="Center"/>
-			<Label 
+            <Label 
                 Text="{Binding CurrentSetPlantProfile}" 
                 FontFamily="Cooper" 
                 FontSize="Large" 
                 TextColor="ForestGreen"
                 FontAttributes="Bold"
                 VerticalTextAlignment="Center"/>
-			<ImageButton Source="reload.png" 
+            <ImageButton Source="reload" 
                          Aspect="AspectFit"
                          WidthRequest="22"
                          HeightRequest="22"
                          Margin="20,0,0,0"
                          Command="{Binding RefreshDataCommand}"></ImageButton>
-			<Button Text="{Binding PumpStatus}" Command="{Binding PumpOnCommand}" />
-		</HorizontalStackLayout>
-
-		<Label Grid.Column="0" Grid.Row="1" HorizontalTextAlignment="Center" Text=" Water Temperature" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
-		<Border Grid.Row="2"
+        </HorizontalStackLayout>
+       
+        <Label Grid.Column="0" Grid.Row="1" HorizontalTextAlignment="Center" Text=" Water Temperature" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
+        <Border Grid.Row="2"
                 Grid.Column="0"
                 Stroke="{StaticResource Secondary}"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 20,20,20,20"
                 Margin="20,10,20,0">
-			<chart:SfCartesianChart Margin="20">
-				<chart:SfCartesianChart.XAxes>
-					<chart:CategoryAxis/>
-				</chart:SfCartesianChart.XAxes>
-				<chart:SfCartesianChart.YAxes>
-					<chart:NumericalAxis/>
-				</chart:SfCartesianChart.YAxes>
-			</chart:SfCartesianChart>
-		</Border>
-		<Label Grid.Column="1" Grid.Row="1" Margin="10" HorizontalTextAlignment="Center" Text="Plant Health" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
-		<Image Grid.Row="2"
+            <chart:SfCartesianChart Margin="20">                            
+                <chart:SfCartesianChart.XAxes>
+                    <chart:CategoryAxis>
+                        <chart:CategoryAxis.Title>
+                            <chart:ChartAxisTitle Text="Water Temprature"/>
+                        </chart:CategoryAxis.Title>
+                    </chart:CategoryAxis>
+                </chart:SfCartesianChart.XAxes>
+                <chart:SfCartesianChart.YAxes>
+                    <chart:NumericalAxis>
+                        <chart:NumericalAxis.Title>
+                            <chart:ChartAxisTitle Text="Celcius"/>
+                        </chart:NumericalAxis.Title>
+                    </chart:NumericalAxis>
+                </chart:SfCartesianChart.YAxes>
+                <chart:ColumnSeries ItemsSource="{Binding WaterTemprature}"
+                                    XBindingPath="Range"
+                                    YBindingPath="Temprature"
+                                    EnableTooltip="True"
+                                    ShowDataLabels="True"
+                                    Label="Temprature"
+                                    PaletteBrushes="{Binding CustomBrushes}"/>
+            </chart:SfCartesianChart>
+        </Border>
+        <Label Grid.Column="1" Grid.Row="1" Margin="10" HorizontalTextAlignment="Center" Text="Plant Health" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
+        <Image Grid.Row="2"
                Grid.Column="1" 
                Source="{Binding PlantHealthStatus}"></Image>
-		<Label Grid.Row="3" Grid.Column="1" Margin="10" HorizontalTextAlignment="Center" Text="{Binding DataReadings}" FontFamily="Cooper" FontSize="16" />
-
-		<Label Grid.Row="3" Grid.Column="0" Margin="10" HorizontalTextAlignment="Center" Text="PH" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
-		<Border Grid.Row="4"
+        <Label Grid.Row="3" Grid.Column="1" Margin="10" HorizontalTextAlignment="Center" Text="Your lettuce is very healthy!" FontFamily="Cooper" FontSize="16" />
+        
+        <Label Grid.Row="3" Grid.Column="0" Margin="10" HorizontalTextAlignment="Center" Text="PH" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
+        <Border Grid.Row="4"
                 Grid.Column="0"
                 Stroke="{StaticResource Secondary}"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 20,20,20,20"
                 Margin="20,10,20,10">
-			<chart:SfCartesianChart Margin="20">
-				<chart:SfCartesianChart.XAxes>
-					<chart:CategoryAxis/>
-				</chart:SfCartesianChart.XAxes>
-				<chart:SfCartesianChart.YAxes>
-					<chart:NumericalAxis/>
-				</chart:SfCartesianChart.YAxes>
-			</chart:SfCartesianChart>
-		</Border>
-		<Label Grid.Row="1" Grid.Column="2" Margin="10" HorizontalTextAlignment="Center" Text="Total Dissolved Solids (TDS)" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
-		<Border Grid.Row="2"
+            <chart:SfCartesianChart Margin="20">                            
+                <chart:SfCartesianChart.XAxes>
+                    <chart:CategoryAxis/>
+                </chart:SfCartesianChart.XAxes>
+                <chart:SfCartesianChart.YAxes>
+                    <chart:NumericalAxis/>
+                </chart:SfCartesianChart.YAxes>                       
+            </chart:SfCartesianChart>
+        </Border>
+        <Label Grid.Row="1" Grid.Column="2" Margin="10" HorizontalTextAlignment="Center" Text="Total Dissolved Solids (TDS)" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
+        <Border Grid.Row="2"
                 Grid.Column="2"
                 Stroke="{StaticResource Secondary}"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 20,20,20,20"
                 Margin="20,10,20,0">
-			<chart:SfCartesianChart Margin="20">
-				<chart:SfCartesianChart.XAxes>
-					<chart:CategoryAxis/>
-				</chart:SfCartesianChart.XAxes>
-				<chart:SfCartesianChart.YAxes>
-					<chart:NumericalAxis/>
-				</chart:SfCartesianChart.YAxes>
-			</chart:SfCartesianChart>
-		</Border>
-		<Label Grid.Row="3" Grid.Column="2" Margin="10" HorizontalTextAlignment="Center" Text="Sensor Statuses" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
-		<Border Grid.Row="4"
+            <chart:SfCartesianChart Margin="20">                            
+                <chart:SfCartesianChart.XAxes>
+                    <chart:CategoryAxis/>
+                </chart:SfCartesianChart.XAxes>
+                <chart:SfCartesianChart.YAxes>
+                    <chart:NumericalAxis/>
+                </chart:SfCartesianChart.YAxes>                       
+            </chart:SfCartesianChart>
+        </Border>
+        <Label Grid.Row="3" Grid.Column="2" Margin="10" HorizontalTextAlignment="Center" Text="Sensor Statuses" FontFamily="Cooper" FontSize="16" FontAttributes="Bold"/>
+        <Border Grid.Row="4"
                 Grid.Column="2"
                 Stroke="{StaticResource Secondary}"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 20,20,20,20"
                 Margin="20,10,20,10">
-		</Border>
-		<VerticalStackLayout Grid.Row="4" Grid.Column="1" Margin="0,10,0,0">
-			<Border Stroke="{StaticResource Secondary}"
+        </Border>
+        <VerticalStackLayout Grid.Row="4" Grid.Column="1" Margin="0,10,0,0">
+            <Border Stroke="{StaticResource Secondary}"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 20,20,20,20">
-				<VerticalStackLayout>
-					<Label Text="Water Level" Margin="10" HorizontalTextAlignment="Center" FontSize="16"></Label>
-					<gauge:SfLinearGauge Margin="10,0,10,10">
-						<gauge:SfLinearGauge.MarkerPointers>
-							<gauge:LinearShapePointer Value="80"/>
-						</gauge:SfLinearGauge.MarkerPointers>
-						<gauge:SfLinearGauge.BarPointers>
-							<gauge:BarPointer Value="60"/>
-						</gauge:SfLinearGauge.BarPointers>
-					</gauge:SfLinearGauge>
-				</VerticalStackLayout>
-			</Border>
-			<HorizontalStackLayout Margin="10,0,10,0" HorizontalOptions="Center">
-				<Border Stroke="{StaticResource Secondary}"
+                <VerticalStackLayout>
+                    <Label Text="Water Level" Margin="10" HorizontalTextAlignment="Center" FontSize="16"></Label>
+                    <gauge:SfLinearGauge Margin="10,0,10,10">
+                        <gauge:SfLinearGauge.MarkerPointers>
+                            <gauge:LinearShapePointer Value="80"/>
+                        </gauge:SfLinearGauge.MarkerPointers>
+                        <gauge:SfLinearGauge.BarPointers>
+                            <gauge:BarPointer Value="60"/>
+                        </gauge:SfLinearGauge.BarPointers>
+                    </gauge:SfLinearGauge>
+                </VerticalStackLayout>
+            </Border>
+            <HorizontalStackLayout Margin="10,0,10,0" HorizontalOptions="Center">
+                <Border Stroke="{StaticResource Secondary}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 20,20,20,20"
                         Margin="20,10,20,30">
-					<VerticalStackLayout HorizontalOptions="Center">
-						<Label Text="Humidity" Margin="10" HorizontalTextAlignment="Center" FontSize="16" FontAttributes="Bold"></Label>
-						<HorizontalStackLayout HorizontalOptions="Center">
-							<Label Text="Current" Margin="5,0,5,0"></Label>
-							<Label Text="vs" Margin="5,0,5,0"></Label>
-							<Label Text="Target" Margin="5,0,5,0"></Label>
-						</HorizontalStackLayout>
-						<HorizontalStackLayout Margin="5" HorizontalOptions="Center">
-							<Label Text="24" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
-							<Label Text=":" Margin="5,0,5,0"></Label>
-							<Label Text="31" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
-						</HorizontalStackLayout>
-					</VerticalStackLayout>
-				</Border>
-				<Border Stroke="{StaticResource Secondary}"
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label Text="Humidity" Margin="10" HorizontalTextAlignment="Center" FontSize="16" FontAttributes="Bold"></Label>
+                        <HorizontalStackLayout HorizontalOptions="Center">
+                            <Label Text="Current" Margin="5,0,5,0"></Label>
+                            <Label Text="vs" Margin="5,0,5,0"></Label>
+                            <Label Text="Target" Margin="5,0,5,0"></Label>
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout Margin="5" HorizontalOptions="Center">
+                            <Label Text="24" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
+                            <Label Text=":" Margin="5,0,5,0"></Label>
+                            <Label Text="31" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Stroke="{StaticResource Secondary}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 20,20,20,20"
                         Margin="20,10,20,30">
-					<VerticalStackLayout>
-						<Label Text="Days Till Harvest" Margin="10,10,10,0" HorizontalTextAlignment="Center" FontSize="16"></Label>
-						<Label Text="18" HorizontalTextAlignment="Center" FontAttributes="Bold" FontSize="48"></Label>
-					</VerticalStackLayout>
-				</Border>
-			</HorizontalStackLayout>
-		</VerticalStackLayout>
-	</Grid>
+                    <VerticalStackLayout>
+                        <Label Text="Days Till Harvest" Margin="10,10,10,0" HorizontalTextAlignment="Center" FontSize="16"></Label>
+                        <Label Text="18" HorizontalTextAlignment="Center" FontAttributes="Bold" FontSize="48"></Label>
+                    </VerticalStackLayout>
+                </Border>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>
