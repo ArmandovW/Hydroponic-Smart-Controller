@@ -1,12 +1,10 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace SmartHydroponicController;
+﻿namespace SmartHydroponicController;
 
 public partial class AppShell : Shell
 {
-    public AppShell()
-    {
-        InitializeComponent();
-        AppConfig.InitializeRoutes();
-    }
+	public AppShell()
+	{
+		InitializeComponent();
+		AppConfig.InitializeRoutes();
+	}
 }

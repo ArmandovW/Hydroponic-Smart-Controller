@@ -42,6 +42,7 @@ public class SQLiteDatabase
 		await _database.CreateTableAsync<Plant>();
 		await _database.CreateTableAsync<PlantProfile>();
 		await _database.CreateTableAsync<PlantStatistics>();
+		await _database.CreateTableAsync<PlantWaterCycle>();
 		await _database.CreateTableAsync<Settings>();
 	}
 
@@ -69,6 +70,12 @@ public class SQLiteDatabase
 		await Init();
 		return await _database.Table<Settings>().FirstOrDefaultAsync();
 	}
+	// Get Plant Water Cycle
+	public async Task<List<PlantWaterCycle>> GetPlantWaterCycleAsync()
+	{
+		await Init();
+		return await _database.Table<PlantWaterCycle>().ToListAsync();
+	}
 	// Get All Plants
 	public async Task<List<Plant>> GetPlantsAsync()
 	{
@@ -95,6 +102,13 @@ public class SQLiteDatabase
 	}
 	// Update
 	public async Task<int> UpdateItemAsync(PlantProfile item)
+	{
+		await Init();
+		return await _database.UpdateAsync(item);
+	}
+
+	// Update
+	public async Task<int> UpdateWaterCycleAsync(PlantWaterCycle item)
 	{
 		await Init();
 		return await _database.UpdateAsync(item);

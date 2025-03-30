@@ -18,7 +18,23 @@ public partial class DashboardViewModel : ObservableObject
 	[ObservableProperty] public string dataReadings;
 	[ObservableProperty] public string pumpStatus;
 
-	[ObservableProperty] public ObservableCollection<WaterTemp> waterTemprature;
+	[ObservableProperty] public decimal currentWaterTemp;
+	[ObservableProperty] public decimal currentPH;
+	[ObservableProperty] public decimal currentTDS;
+	[ObservableProperty] public decimal currentHumidity;
+
+	[ObservableProperty] public string waterReadingStatusColor;
+	[ObservableProperty] public string tdsReadingStatusColor;
+	[ObservableProperty] public string pHReadingStatusColor;
+	[ObservableProperty] public string humidityReadingStatusColor;
+
+	[ObservableProperty] public int currentPlantStage;
+	[ObservableProperty] public PlantProfile currentPlantProfile;
+
+	[ObservableProperty] public SerialReadings waterReadings;
+	[ObservableProperty] public SerialReadings tdsReadings;
+	[ObservableProperty] public SerialReadings pHReadings;
+	[ObservableProperty] public SerialReadings humidityReadings;
 	[ObservableProperty] public ObservableCollection<Brush> customBrushes;
 	public DashboardViewModel(SQLiteDatabase database, SerialPortService serialPortService)
 	{
@@ -52,6 +68,9 @@ public partial class DashboardViewModel : ObservableObject
 		}
 		var plants = await _db.GetPlantsAsync();
 		var plantProfiles = await _db.GetPlantProfilesAsync();
+		var plantStats = await _db.GetPlantStatisticsAsync();
+		CurrentPlantStage = plantStats.LastOrDefault() is not null ? plantStats.LastOrDefault().Stage : 1;
+		CurrentPlantProfile = await _db.GetPlantProfileByStageAsync(CurrentPlantStage);
 		if (plants.Count() > 0)
 		{
 			CurrentSetPlantProfile = plants.Where(x => x.PlantId == plantProfiles.First().PlantId).First().PlantName;
@@ -61,25 +80,138 @@ public partial class DashboardViewModel : ObservableObject
 			CurrentSetPlantProfile = "No Plant Profile Set";
 		}
 
-		WaterTemprature = new ObservableCollection<WaterTemp>()
-				{
-						new WaterTemp { Range = "Max", Temprature = plantProfiles.First().IdealWaterTemperatureMaxC },
-						new WaterTemp { Range = "Min", Temprature = plantProfiles.First().IdealWaterTemperatureMinC },
-						new WaterTemp { Range = "Current", Temprature = 22.6M }
-				};
-		CustomBrushes = new ObservableCollection<Brush>();
-		foreach (var item in WaterTemprature)
+		SetWaterReadings(CurrentPlantProfile);
+		SetTDSReadings(CurrentPlantProfile);
+		SetHumidityReadings(CurrentPlantProfile);
+		SetPHReadings(CurrentPlantProfile);
+
+	}
+
+	private async Task LogPlantProgress()
+	{
+		await CheckPlantStage();
+		PlantStatistics plantStatistics = new PlantStatistics()
 		{
-			if (item.Range == "Max") CustomBrushes.Add(new SolidColorBrush(Colors.DarkRed));
-			else if (item.Range == "Min") CustomBrushes.Add(new SolidColorBrush(Colors.Orange));
+			PlantId = CurrentPlantProfile.PlantId,
+			Stage = CurrentPlantStage,
+			WaterTemperatureC = CurrentWaterTemp,
+			IdealWaterTemperatureAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			PH = CurrentPH,
+			IdealPHAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			TDS = CurrentTDS,
+			IdealTDSAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			Humidity = CurrentHumidity,
+			IdealHumidityAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			DateAdded = DateTime.Now,
+			Notes = $"{PumpStatus}"
+		};
+		await _db.AddItemAsync<PlantStatistics>(plantStatistics);
+		var waterCycle = await _db.GetPlantWaterCycleAsync();
+		if(waterCycle is null && PumpStatus == "PUMPOFF")
+		{
+			_serialService.WriteData("PUMPON");
+			PlantWaterCycle plantWaterCycle = new PlantWaterCycle
+			{
+				PlantId = CurrentPlantProfile.PlantId,
+				Stage = CurrentPlantStage,
+				WaterCycleStarted = DateTime.Now,
+				WaterCycleEnded = null
+			};
+			await _db.AddItemAsync(plantWaterCycle);
+		}
+		else if (PumpStatus == "PUMPON")
+		{
+			var currentWaterCycle = waterCycle.Where(x => x.WaterCycleEnded is null).FirstOrDefault();
+			var pumpRunningTime = (DateTime.Now - currentWaterCycle.WaterCycleStarted).Value.Minutes;
+			if(pumpRunningTime >= CurrentPlantProfile.WateringScheduleDailyDosingMinutes)
+			{
+				currentWaterCycle.WaterCycleEnded = DateTime.Now;
+				await _db.UpdateWaterCycleAsync(currentWaterCycle);
+				_serialService.WriteData("PUMPOFF");
+			}
+		}
+		else
+		{
+			var lastWaterCycle = waterCycle.LastOrDefault();
+			var today = lastWaterCycle.WaterCycleEnded.Value.Date;
+			var cycleCount = waterCycle.Where(x => x.WaterCycleEnded.Value.Date == today).Count();
+			var hourInterval = 24 / CurrentPlantProfile.WateringScheduleDailyCycle;
+			var pumpDailyCycle = (DateTime.Now - lastWaterCycle.WaterCycleEnded).Value.Hours;
+			if(pumpDailyCycle >= hourInterval)
+			{
+				_serialService.WriteData("PUMPON");
+				PlantWaterCycle plantWaterCycle = new PlantWaterCycle
+				{
+					PlantId = CurrentPlantProfile.PlantId,
+					Stage = CurrentPlantStage,
+					WaterCycleStarted = DateTime.Now,
+					WaterCycleEnded = null
+				};
+				await _db.AddItemAsync(plantWaterCycle);
+			}
 		}
 
-		var max = WaterTemprature.Where(x => x.Range == "Max").FirstOrDefault().Temprature;
-		var min = WaterTemprature.Where(x => x.Range == "Min").FirstOrDefault().Temprature;
-		var current = WaterTemprature.Where(x => x.Range == "Current").FirstOrDefault().Temprature;
-		if (current < min || current > max) CustomBrushes.Add(new SolidColorBrush(Colors.Red));
-		else CustomBrushes.Add(new SolidColorBrush(Colors.Green));
 	}
+
+	private async Task CheckPlantStage()
+	{
+		var log = await _db.GetPlantStatisticsAsync();
+		var currentDate = DateTime.Now;
+		var elapsedDays = (currentDate - log.Where(x => x.Stage == CurrentPlantStage).FirstOrDefault().DateAdded.Value).Days;
+		if (elapsedDays >= CurrentPlantProfile.StageDurationDays)
+		{
+			CurrentPlantStage++;
+			CurrentPlantProfile = await _db.GetPlantProfileByStageAsync(CurrentPlantStage);
+		}
+	}
+
+	private void SetWaterReadings(PlantProfile profile)
+	{
+		WaterReadings = new SerialReadings
+		{
+			Min = profile.IdealWaterTemperatureMinC,
+			Max = profile.IdealWaterTemperatureMaxC,
+			Current = 22.4M
+		};
+		if (WaterReadings.Current >= WaterReadings.Min && WaterReadings.Current <= WaterReadings.Max) WaterReadingStatusColor = "ForestGreen";
+		else WaterReadingStatusColor = "Red";
+	}
+
+	private void SetTDSReadings(PlantProfile profile)
+	{
+		TdsReadings = new SerialReadings
+		{
+			Min = profile.IdealTDSMinPPM,
+			Max = profile.IdealTDSMaxPPM,
+			Current = 0M
+		};
+		if (TdsReadings.Current >= TdsReadings.Min && TdsReadings.Current <= TdsReadings.Max) TdsReadingStatusColor = "ForestGreen";
+		else TdsReadingStatusColor = "Red";
+	}
+
+	private void SetPHReadings(PlantProfile profile)
+	{
+		PHReadings = new SerialReadings
+		{
+			Min = profile.IdealPHMin,
+			Max = profile.IdealPHMax,
+			Current = 0M
+		};
+		if (PHReadings.Current >= PHReadings.Min && PHReadings.Current <= PHReadings.Max) PHReadingStatusColor = "ForestGreen";
+		else PHReadingStatusColor = "Red";
+	}
+	private void SetHumidityReadings(PlantProfile profile)
+	{
+		HumidityReadings = new SerialReadings
+		{
+			Min = profile.IdealHumidityMin,
+			Max = profile.IdealHumidityMax,
+			Current = 0M
+		};
+		if (HumidityReadings.Current >= HumidityReadings.Min && HumidityReadings.Current <= HumidityReadings.Max) HumidityReadingStatusColor = "ForestGreen";
+		else HumidityReadingStatusColor = "Red";
+	}
+
 	[RelayCommand]
 	public async Task RefreshData()
 	{
@@ -106,7 +238,7 @@ public partial class DashboardViewModel : ObservableObject
 	[RelayCommand]
 	private void PumpOn()
 	{
-		if(PumpStatus == "PUMPOFF")
+		if (PumpStatus == "PUMPOFF")
 		{
 			PumpStatus = "PUMPON";
 			_serialService.WriteData(PumpStatus);

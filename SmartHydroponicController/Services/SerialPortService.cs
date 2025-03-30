@@ -60,7 +60,6 @@ public class SerialPortService
 			_serialPort.ErrorReceived -= SerialPort_ErrorReceived;
 			_serialPort.Close();
 			_serialPort.Dispose(); // Release resources
-			_serialPort = null;
 		}
 	}
 

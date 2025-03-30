@@ -1,10 +1,8 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
-using Syncfusion.Maui.DataGrid;
 using Syncfusion.Maui.DataSource.Extensions;
+using System.Collections.ObjectModel;
 
 namespace SmartHydroponicController.ViewModels;
 

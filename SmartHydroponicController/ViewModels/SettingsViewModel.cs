@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
 using SmartHydroponicController.Services;
-using Windows.Media.Devices;
 
 namespace SmartHydroponicController.ViewModels;
 
