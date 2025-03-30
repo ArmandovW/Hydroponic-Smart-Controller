@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
 using Syncfusion.Maui.DataSource.Extensions;
@@ -13,16 +14,15 @@ public partial class GrowthLogViewModel : ObservableObject
 	public GrowthLogViewModel(SQLiteDatabase database)
 	{
 		_db = database;
+		GrowthLog = new ObservableCollection<PlantStatistics>();
 		MainThread.BeginInvokeOnMainThread(async () =>
 		{
 			await LoadData();
 		});
 
 	}
-
 	private async Task LoadData()
 	{
-		GrowthLog = new ObservableCollection<PlantStatistics>();
 		try
 		{
 			var logs = await _db.GetPlantStatisticsAsync();
@@ -35,4 +35,19 @@ public partial class GrowthLogViewModel : ObservableObject
 		}
 
 	}
+	[RelayCommand]
+	private async Task RefreshData()
+	{
+		GrowthLog.Clear();
+		try
+		{
+			await LoadData();
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+		}
+
+	}
+
 }

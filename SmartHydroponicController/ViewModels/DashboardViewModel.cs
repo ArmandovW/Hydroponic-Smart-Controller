@@ -13,6 +13,7 @@ public partial class DashboardViewModel : ObservableObject
 {
 	private readonly SQLiteDatabase _db;
 	private readonly SerialPortService _serialService;
+	private int insertLogCounter = 0;
 
 	[ObservableProperty] public string currentSetPlantProfile;
 	[ObservableProperty] public string plantHealthStatus;
@@ -52,10 +53,18 @@ public partial class DashboardViewModel : ObservableObject
 	{
 		DataReadings = string.Empty;
 		DataReadings = data;
-		MainThread.BeginInvokeOnMainThread(async () => 
+		if (DataReadings.Contains("OFF")) PumpStatus = "PUMPOFF";
+		else PumpStatus = "PUMPON";
+		insertLogCounter++;
+		if(insertLogCounter == 5)
 		{
-			await LogPlantProgress();
-		});
+			MainThread.BeginInvokeOnMainThread(async () =>
+			{
+				await LogPlantProgress();
+				await PlantHealth();
+				insertLogCounter = 0;
+			});
+		}
 	}
 
 	private async Task LoadDataAsync()
@@ -75,7 +84,7 @@ public partial class DashboardViewModel : ObservableObject
 		var plantStats = await _db.GetPlantStatisticsAsync();
 		CurrentPlantStage = plantStats.LastOrDefault() is not null ? plantStats.LastOrDefault().Stage : 1;
 		CurrentPlantProfile = await _db.GetPlantProfileByStageAsync(CurrentPlantStage);
-		if (plants.Count() > 0)
+		if (plants.Count() > 0 && CurrentPlantProfile != null)
 		{
 			CurrentSetPlantProfile = plants.Where(x => x.PlantId == CurrentPlantProfile.PlantId).First().PlantName;
 			SetWaterReadings(CurrentPlantProfile);
@@ -110,7 +119,7 @@ public partial class DashboardViewModel : ObservableObject
 		};
 		await _db.AddItemAsync<PlantStatistics>(plantStatistics);
 		var waterCycle = await _db.GetPlantWaterCycleAsync();
-		if(waterCycle is null && PumpStatus == "PUMPOFF")
+		if(waterCycle.Count() == 0 && PumpStatus == "PUMPOFF")
 		{
 			_serialService.WriteData("PUMPON");
 			PlantWaterCycle plantWaterCycle = new PlantWaterCycle
@@ -136,6 +145,7 @@ public partial class DashboardViewModel : ObservableObject
 		else
 		{
 			var lastWaterCycle = waterCycle.LastOrDefault();
+			if(lastWaterCycle.WaterCycleEnded == null) return;
 			var today = lastWaterCycle.WaterCycleEnded.Value.Date;
 			var cycleCount = waterCycle.Where(x => x.WaterCycleEnded.Value.Date == today).Count();
 			var hourInterval = 24 / CurrentPlantProfile.WateringScheduleDailyCycle;
@@ -159,6 +169,7 @@ public partial class DashboardViewModel : ObservableObject
 	private async Task CheckPlantStage()
 	{
 		var log = await _db.GetPlantStatisticsAsync();
+		if (log.Count() == 0) return;
 		var currentDate = DateTime.Now;
 		var elapsedDays = (currentDate - log.Where(x => x.Stage == CurrentPlantStage).FirstOrDefault().DateAdded.Value).Days;
 		if (elapsedDays >= CurrentPlantProfile.StageDurationDays)

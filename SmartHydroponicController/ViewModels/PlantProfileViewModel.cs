@@ -128,7 +128,7 @@ public partial class PlantProfileViewModel : ObservableObject
 			Notes = "Use a humidity dome. Monitor moisture levels in starter plugs closely.",
 			PlantRootWaterLevel = "Moist starter plug, roots not yet in nutrient solution",
 			Airflow = "Very Gentle, almost none",
-			WateringScheduleDailyDosingMinutes = 15,
+			WateringScheduleDailyDosingMinutes = 2,
 			WateringScheduleDailyCycle = 5
 		};
 

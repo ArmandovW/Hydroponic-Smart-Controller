@@ -7,20 +7,21 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Label Text="Growth Statistics Log" HorizontalTextAlignment="Center" FontSize="Large" FontAttributes="Bold"></Label>
-            <syncfusion:SfDataGrid Grid.Row="1"
+		<HorizontalStackLayout Grid.Row="1" Margin="10">
+			<Button Text="Refresh" BackgroundColor="ForestGreen" TextColor="White" Command="{Binding RefreshDataCommand}"/>
+		</HorizontalStackLayout>
+		<syncfusion:SfDataGrid Grid.Row="2"
                 ItemsSource="{Binding GrowthLog}"
                 ColumnWidthMode="Auto"
                 Margin="20"
                 HorizontalScrollBarVisibility="Always"
                 CellTappedCommand="{Binding SelectPlantToGrowCommand}">
-            </syncfusion:SfDataGrid>
-            <VerticalStackLayout Grid.Row="2">
-                
-            </VerticalStackLayout>
-                
-        </Grid>
+			
+		</syncfusion:SfDataGrid>
+
+	</Grid>
 </ContentPage>
