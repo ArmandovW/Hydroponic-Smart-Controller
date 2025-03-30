@@ -5,6 +5,7 @@ using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
 using SmartHydroponicController.Services;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace SmartHydroponicController.ViewModels;
 
@@ -18,10 +19,10 @@ public partial class DashboardViewModel : ObservableObject
 	[ObservableProperty] public string dataReadings;
 	[ObservableProperty] public string pumpStatus;
 
-	[ObservableProperty] public decimal currentWaterTemp;
-	[ObservableProperty] public decimal currentPH;
-	[ObservableProperty] public decimal currentTDS;
-	[ObservableProperty] public decimal currentHumidity;
+	[ObservableProperty] public decimal currentWaterTemp = 0;
+	[ObservableProperty] public decimal currentPH = 0;
+	[ObservableProperty] public decimal currentTDS = 0;
+	[ObservableProperty] public decimal currentHumidity = 0;
 
 	[ObservableProperty] public string waterReadingStatusColor;
 	[ObservableProperty] public string tdsReadingStatusColor;
@@ -31,11 +32,10 @@ public partial class DashboardViewModel : ObservableObject
 	[ObservableProperty] public int currentPlantStage;
 	[ObservableProperty] public PlantProfile currentPlantProfile;
 
-	[ObservableProperty] public SerialReadings waterReadings;
-	[ObservableProperty] public SerialReadings tdsReadings;
-	[ObservableProperty] public SerialReadings pHReadings;
-	[ObservableProperty] public SerialReadings humidityReadings;
-	[ObservableProperty] public ObservableCollection<Brush> customBrushes;
+	[ObservableProperty] public SerialReadings waterReadings = new();
+	[ObservableProperty] public SerialReadings tdsReadings = new();
+	[ObservableProperty] public SerialReadings pHReadings = new();
+	[ObservableProperty] public SerialReadings humidityReadings = new();
 	public DashboardViewModel(SQLiteDatabase database, SerialPortService serialPortService)
 	{
 		_db = database;
@@ -52,6 +52,10 @@ public partial class DashboardViewModel : ObservableObject
 	{
 		DataReadings = string.Empty;
 		DataReadings = data;
+		MainThread.BeginInvokeOnMainThread(async () => 
+		{
+			await LogPlantProgress();
+		});
 	}
 
 	private async Task LoadDataAsync()
@@ -73,17 +77,16 @@ public partial class DashboardViewModel : ObservableObject
 		CurrentPlantProfile = await _db.GetPlantProfileByStageAsync(CurrentPlantStage);
 		if (plants.Count() > 0)
 		{
-			CurrentSetPlantProfile = plants.Where(x => x.PlantId == plantProfiles.First().PlantId).First().PlantName;
+			CurrentSetPlantProfile = plants.Where(x => x.PlantId == CurrentPlantProfile.PlantId).First().PlantName;
+			SetWaterReadings(CurrentPlantProfile);
+			SetTDSReadings(CurrentPlantProfile);
+			SetHumidityReadings(CurrentPlantProfile);
+			SetPHReadings(CurrentPlantProfile);
 		}
 		else
 		{
 			CurrentSetPlantProfile = "No Plant Profile Set";
 		}
-
-		SetWaterReadings(CurrentPlantProfile);
-		SetTDSReadings(CurrentPlantProfile);
-		SetHumidityReadings(CurrentPlantProfile);
-		SetPHReadings(CurrentPlantProfile);
 
 	}
 
@@ -222,6 +225,43 @@ public partial class DashboardViewModel : ObservableObject
 	[RelayCommand]
 	public async Task PlantHealth()
 	{
+		int falseCount = 0;
+		var log = await _db.GetPlantStatisticsAsync();
+		if (log.Count == 0) return;
+		else
+		{
+			foreach (PropertyInfo property in log.LastOrDefault().GetType().GetProperties())
+			{
+				if (property.PropertyType == typeof(bool))
+				{
+					bool value = (bool)property.GetValue(log.LastOrDefault());
+					if (!value)
+					{
+						falseCount++;
+					}
+				}
+			}
+			switch (falseCount)
+			{
+				case 0:
+					PlantHealthStatus = "excellent.png";
+					break;
+				case 1:
+					PlantHealthStatus = "good.png";
+					break;
+				case 2:
+					PlantHealthStatus = "unhappy.png";
+					break;
+				case 3:
+					PlantHealthStatus = "bad.png";
+					break;
+				case 4:
+					PlantHealthStatus = "verybad.png";
+					break;
+				default:
+					break;
+			}
+		}
 		if (PlantHealthStatus == "excellent.png")
 		{
 			PlantHealthStatus = "good.png";

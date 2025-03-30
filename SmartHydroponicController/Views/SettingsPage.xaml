@@ -15,7 +15,7 @@
 		<VerticalStackLayout >
 			<Label Text="COM Port"/>
 			<Picker ItemsSource="{Binding SerialPortNames}" 
-										SelectedItem="{Binding ComSettings.PortName}">
+							SelectedItem="{Binding ComSettings.PortName}">
 			</Picker>
 		</VerticalStackLayout>
 		<VerticalStackLayout Grid.Row="1">

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SmartHydroponicController.Data;
 using SmartHydroponicController.Models;
 using SmartHydroponicController.Services;
+using Windows.Media.Devices;
 
 namespace SmartHydroponicController.ViewModels;
 
@@ -26,12 +27,14 @@ public partial class SettingsViewModel : ObservableObject
 	private async Task LoadSettings()
 	{
 		var settings = await _db.GetSettingsAsync();
-		ComSettings = settings;
+		if (settings == null) ComSettings = new();
+		else ComSettings = settings;
 	}
 	[RelayCommand]
 	public async Task SaveSettings()
 	{
 		ComSettings.Id = 0;
+		if (ComSettings.PortName == null) ComSettings.PortName = "COM3";
 		var result = await _db.AddItemAsync<Settings>(ComSettings);
 		if (result != 0) await Application.Current.MainPage.DisplayAlert("Save settings?", $"Settings saved successfully", "Ok");
 		else await Application.Current.MainPage.DisplayAlert("Save Failed?", $"Settings failed to save", "Ok");
