@@ -32,6 +32,7 @@ public partial class DashboardViewModel : ObservableObject
 
 	[ObservableProperty] public int currentPlantStage;
 	[ObservableProperty] public PlantProfile currentPlantProfile;
+	[ObservableProperty] public bool showPumpGif = false;
 
 	[ObservableProperty] public SerialReadings waterReadings = new();
 	[ObservableProperty] public SerialReadings tdsReadings = new();
@@ -53,10 +54,13 @@ public partial class DashboardViewModel : ObservableObject
 	{
 		DataReadings = string.Empty;
 		DataReadings = data;
+		SetSerialReadings(data);
 		if (DataReadings.Contains("OFF")) PumpStatus = "PUMPOFF";
 		else PumpStatus = "PUMPON";
+		if (PumpStatus == "PUMPON") ShowPumpGif = true;
+		else ShowPumpGif = false;
 		insertLogCounter++;
-		if(insertLogCounter == 5)
+		if(insertLogCounter >= 5)
 		{
 			MainThread.BeginInvokeOnMainThread(async () =>
 			{
@@ -65,6 +69,33 @@ public partial class DashboardViewModel : ObservableObject
 				insertLogCounter = 0;
 			});
 		}
+	}
+
+	private void SetSerialReadings(string data)
+	{
+		var values = data.Split('$').ToList();
+		try
+		{
+			CurrentWaterTemp = Convert.ToDecimal(values[0].Substring(2));
+			CurrentHumidity = Convert.ToDecimal(values[1].Substring(2));
+			CurrentPH = Convert.ToDecimal(values[3].Substring(2));
+
+			if (CurrentWaterTemp >= WaterReadings.Min && CurrentWaterTemp <= WaterReadings.Max) WaterReadingStatusColor = "ForestGreen";
+			else WaterReadingStatusColor = "Red";
+			if (CurrentHumidity >= HumidityReadings.Min && CurrentHumidity <= HumidityReadings.Max) HumidityReadingStatusColor = "ForestGreen";
+			else HumidityReadingStatusColor = "Red";
+			if (CurrentPH >= PHReadings.Min && CurrentPH <= PHReadings.Max) PHReadingStatusColor = "ForestGreen";
+			else PHReadingStatusColor = "Red";
+			if (CurrentTDS >= TdsReadings.Min && CurrentTDS <= TdsReadings.Max) TdsReadingStatusColor = "ForestGreen";
+			else TdsReadingStatusColor = "Red";
+
+		}
+		catch (Exception)
+		{
+
+			WaterReadings.Current = 0M;
+		}
+		
 	}
 
 	private async Task LoadDataAsync()
@@ -187,8 +218,6 @@ public partial class DashboardViewModel : ObservableObject
 			Max = profile.IdealWaterTemperatureMaxC,
 			Current = 22.4M
 		};
-		if (WaterReadings.Current >= WaterReadings.Min && WaterReadings.Current <= WaterReadings.Max) WaterReadingStatusColor = "ForestGreen";
-		else WaterReadingStatusColor = "Red";
 	}
 
 	private void SetTDSReadings(PlantProfile profile)
@@ -199,8 +228,6 @@ public partial class DashboardViewModel : ObservableObject
 			Max = profile.IdealTDSMaxPPM,
 			Current = 0M
 		};
-		if (TdsReadings.Current >= TdsReadings.Min && TdsReadings.Current <= TdsReadings.Max) TdsReadingStatusColor = "ForestGreen";
-		else TdsReadingStatusColor = "Red";
 	}
 
 	private void SetPHReadings(PlantProfile profile)
@@ -211,8 +238,6 @@ public partial class DashboardViewModel : ObservableObject
 			Max = profile.IdealPHMax,
 			Current = 0M
 		};
-		if (PHReadings.Current >= PHReadings.Min && PHReadings.Current <= PHReadings.Max) PHReadingStatusColor = "ForestGreen";
-		else PHReadingStatusColor = "Red";
 	}
 	private void SetHumidityReadings(PlantProfile profile)
 	{
@@ -222,8 +247,6 @@ public partial class DashboardViewModel : ObservableObject
 			Max = profile.IdealHumidityMax,
 			Current = 0M
 		};
-		if (HumidityReadings.Current >= HumidityReadings.Min && HumidityReadings.Current <= HumidityReadings.Max) HumidityReadingStatusColor = "ForestGreen";
-		else HumidityReadingStatusColor = "Red";
 	}
 
 	[RelayCommand]
@@ -287,19 +310,8 @@ public partial class DashboardViewModel : ObservableObject
 		}
 	}
 	[RelayCommand]
-	private void PumpOn()
+	private async Task RestartProcess()
 	{
-		if (PumpStatus == "PUMPOFF")
-		{
-			PumpStatus = "PUMPON";
-			_serialService.WriteData(PumpStatus);
-
-		}
-		else
-		{
-			PumpStatus = "PUMPOFF";
-			_serialService.WriteData(PumpStatus);
-
-		}
+		await _db.ClearAllDatabaseTables();
 	}
 }

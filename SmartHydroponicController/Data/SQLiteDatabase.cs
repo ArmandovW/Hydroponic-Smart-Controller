@@ -122,8 +122,8 @@ public class SQLiteDatabase
 
 	public async Task ClearAllDatabaseTables()
 	{
-		await _database.DeleteAllAsync<PlantProfile>();
 		await _database.DeleteAllAsync<PlantStatistics>();
+		await _database.DeleteAllAsync<PlantWaterCycle>();
 		await Task.CompletedTask;
 	}
 }
