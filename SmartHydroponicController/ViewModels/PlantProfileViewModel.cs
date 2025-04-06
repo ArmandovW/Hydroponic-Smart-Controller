@@ -73,7 +73,7 @@ public partial class PlantProfileViewModel : ObservableObject
 			var response = await Application.Current.MainPage.DisplayAlert("Set New Plant Profile?", $"Do you want to set {plant.PlantName} as your new plant profile?", "Yes", "No");
 			if (response)
 			{
-				await _db.ClearAllDatabaseTables();
+				await _db.ClearSelectedDatabaseTables();
 				await SetPlantProfile(plant.PlantId);
 			}
 			else

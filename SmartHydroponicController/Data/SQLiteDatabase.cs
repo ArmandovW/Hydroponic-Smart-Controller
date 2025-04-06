@@ -7,10 +7,7 @@ public class SQLiteDatabase
 {
 	private readonly string _databasePath;
 	private SQLiteAsyncConnection _database;
-	public SQLiteDatabase()
-	{
-		_databasePath = GetDatabasePath();
-	}
+	public SQLiteDatabase() => _databasePath = GetDatabasePath();
 
 	private string GetDatabasePath()
 	{
