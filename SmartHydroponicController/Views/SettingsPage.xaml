@@ -26,6 +26,6 @@
 			<Label Text="Data Bits"/>
 			<Entry Placeholder="Enter Stop Bits Here" Text="{Binding ComSettings.DataBits}"/>
 		</VerticalStackLayout>
-		<Button Grid.Row="4" Text="Save Settings" Command="{Binding SaveSettingsCommand}"/>
+		<Button Margin="0,20,0,0" Grid.Row="4" Text="Save Settings" Command="{Binding SaveSettingsCommand}"/>
 	</Grid>
 </ContentPage>

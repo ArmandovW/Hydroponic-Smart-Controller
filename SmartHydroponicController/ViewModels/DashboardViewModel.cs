@@ -31,6 +31,8 @@ public partial class DashboardViewModel : ObservableObject
 	[ObservableProperty] public string humidityReadingStatusColor;
 
 	[ObservableProperty] public int currentPlantStage;
+	[ObservableProperty] public int waterCyclesCompleted;
+	[ObservableProperty] public int targetWaterCycles;
 	[ObservableProperty] public PlantProfile currentPlantProfile;
 	[ObservableProperty] public bool showPumpGif = false;
 
@@ -113,6 +115,7 @@ public partial class DashboardViewModel : ObservableObject
 		var plants = await _db.GetPlantsAsync();
 		var plantProfiles = await _db.GetPlantProfilesAsync();
 		var plantStats = await _db.GetPlantStatisticsAsync();
+		var ws = await _db.GetPlantWaterCycleAsync();
 		CurrentPlantStage = plantStats.LastOrDefault() is not null ? plantStats.LastOrDefault().Stage : 1;
 		CurrentPlantProfile = await _db.GetPlantProfileByStageAsync(CurrentPlantStage);
 		if (plants.Count() > 0 && CurrentPlantProfile != null)
@@ -122,6 +125,8 @@ public partial class DashboardViewModel : ObservableObject
 			SetTDSReadings(CurrentPlantProfile);
 			SetHumidityReadings(CurrentPlantProfile);
 			SetPHReadings(CurrentPlantProfile);
+			TargetWaterCycles = Convert.ToInt32(CurrentPlantProfile.WateringScheduleDailyCycle * CurrentPlantProfile.StageDurationDays);
+			WaterCyclesCompleted = ws.Count();
 		}
 		else
 		{
@@ -138,13 +143,13 @@ public partial class DashboardViewModel : ObservableObject
 			PlantId = CurrentPlantProfile.PlantId,
 			Stage = CurrentPlantStage,
 			WaterTemperatureC = CurrentWaterTemp,
-			IdealWaterTemperatureAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			IdealWaterTemperatureAchieved = (CurrentWaterTemp >= CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp <= CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
 			PH = CurrentPH,
-			IdealPHAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			IdealPHAchieved = (CurrentPH >= CurrentPlantProfile.IdealPHMin && CurrentPH <= CurrentPlantProfile.IdealPHMax) ? true : false,
 			TDS = CurrentTDS,
-			IdealTDSAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			IdealTDSAchieved = (CurrentTDS >= CurrentPlantProfile.IdealTDSMinPPM && CurrentTDS <= CurrentPlantProfile.IdealTDSMaxPPM) ? true : false,
 			Humidity = CurrentHumidity,
-			IdealHumidityAchieved = (CurrentWaterTemp > CurrentPlantProfile.IdealWaterTemperatureMinC && CurrentWaterTemp < CurrentPlantProfile.IdealWaterTemperatureMaxC) ? true : false,
+			IdealHumidityAchieved = (CurrentHumidity >= CurrentPlantProfile.IdealHumidityMin && CurrentHumidity <= CurrentPlantProfile.IdealHumidityMax) ? true : false,
 			DateAdded = DateTime.Now,
 			Notes = $"{PumpStatus}"
 		};
@@ -162,7 +167,7 @@ public partial class DashboardViewModel : ObservableObject
 			};
 			await _db.AddItemAsync(plantWaterCycle);
 		}
-		else if (PumpStatus == "PUMPON")
+		else if (PumpStatus == "PUMPON" && waterCycle.Count() > 0)
 		{
 			var currentWaterCycle = waterCycle.Where(x => x.WaterCycleEnded is null).FirstOrDefault();
 			var pumpRunningTime = (DateTime.Now - currentWaterCycle.WaterCycleStarted).Value.Minutes;
@@ -171,12 +176,23 @@ public partial class DashboardViewModel : ObservableObject
 				currentWaterCycle.WaterCycleEnded = DateTime.Now;
 				await _db.UpdateWaterCycleAsync(currentWaterCycle);
 				_serialService.WriteData("PUMPOFF");
+				WaterCyclesCompleted = waterCycle.Where(x => x.WaterCycleEnded != null).Count();
 			}
 		}
-		else
+		else if (waterCycle.Count() > 0)
 		{
 			var lastWaterCycle = waterCycle.LastOrDefault();
-			if(lastWaterCycle.WaterCycleEnded == null) return;
+			if(lastWaterCycle.WaterCycleEnded == null)
+			{
+				var timeElapsed = Convert.ToDecimal((DateTime.Now - lastWaterCycle.WaterCycleStarted.Value).TotalMinutes);
+				if (timeElapsed >= CurrentPlantProfile.WateringScheduleDailyDosingMinutes) lastWaterCycle.WaterCycleEnded = DateTime.Now;
+				else
+				{
+					_serialService.WriteData("PUMPON");
+					return;
+				}
+				await _db.UpdateWaterCycleAsync(lastWaterCycle);
+			}
 			var today = lastWaterCycle.WaterCycleEnded.Value.Date;
 			var cycleCount = waterCycle.Where(x => x.WaterCycleEnded.Value.Date == today).Count();
 			var hourInterval = 24 / CurrentPlantProfile.WateringScheduleDailyCycle;
@@ -312,6 +328,7 @@ public partial class DashboardViewModel : ObservableObject
 	[RelayCommand]
 	private async Task RestartProcess()
 	{
-		await _db.ClearAllDatabaseTables();
+		await _db.ClearSelectedDatabaseTables();
+		await RefreshData();
 	}
 }

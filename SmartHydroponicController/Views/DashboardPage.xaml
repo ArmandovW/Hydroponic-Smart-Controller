@@ -176,9 +176,9 @@
 						<Label Text="Finished" Margin="5,0,5,0"></Label>
 					</HorizontalStackLayout>
 					<HorizontalStackLayout HorizontalOptions="Center">
-						<Label Text="24" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
+						<Label Text="{Binding TargetWaterCycles}" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
 						<Label Text=" : " Margin="5,0,5,0"></Label>
-						<Label Text="31" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
+						<Label Text="{Binding WaterCyclesCompleted}" Margin="5,0,5,0" FontSize="18" FontAttributes="Bold"></Label>
 					</HorizontalStackLayout>
 				</VerticalStackLayout>
 			</Border>
