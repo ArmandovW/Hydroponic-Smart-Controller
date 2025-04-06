@@ -55,7 +55,7 @@ public partial class DashboardViewModel : ObservableObject
 	private void SerialServiceOnDataReceived(object? sender, string data)
 	{
 		SetSerialReadings(data);
-		if (DataReadings.Contains("OFF")) PumpStatus = "PUMPOFF";
+		if (data.Contains("OFF")) PumpStatus = "PUMPOFF";
 		else PumpStatus = "PUMPON";
 		if (PumpStatus == "PUMPON") ShowPumpGif = true;
 		else ShowPumpGif = false;
