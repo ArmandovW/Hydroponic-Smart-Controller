@@ -54,8 +54,6 @@ public partial class DashboardViewModel : ObservableObject
 
 	private void SerialServiceOnDataReceived(object? sender, string data)
 	{
-		DataReadings = string.Empty;
-		DataReadings = data;
 		SetSerialReadings(data);
 		if (DataReadings.Contains("OFF")) PumpStatus = "PUMPOFF";
 		else PumpStatus = "PUMPON";
@@ -154,6 +152,11 @@ public partial class DashboardViewModel : ObservableObject
 			Notes = $"{PumpStatus}"
 		};
 		await _db.AddItemAsync<PlantStatistics>(plantStatistics);
+		if (plantStatistics.IdealWaterTemperatureAchieved && plantStatistics.IdealHumidityAchieved && plantStatistics.IdealTDSAchieved && plantStatistics.IdealPHAchieved) DataReadings = "Your plant is in excellent condition";
+		else if (plantStatistics.IdealWaterTemperatureAchieved && plantStatistics.IdealHumidityAchieved && plantStatistics.IdealTDSAchieved && !plantStatistics.IdealPHAchieved) DataReadings = "Your plant is in good condition";
+		else if (plantStatistics.IdealWaterTemperatureAchieved && plantStatistics.IdealHumidityAchieved && !plantStatistics.IdealTDSAchieved && !plantStatistics.IdealPHAchieved) DataReadings = "Your plant needs attention";
+		else if (plantStatistics.IdealWaterTemperatureAchieved && !plantStatistics.IdealHumidityAchieved && !plantStatistics.IdealTDSAchieved && !plantStatistics.IdealPHAchieved) DataReadings = "Your plant health is a bad condition";
+		else DataReadings = "Your plant health is in very bad condition!";
 		var waterCycle = await _db.GetPlantWaterCycleAsync();
 		if(waterCycle.Count() == 0 && PumpStatus == "PUMPOFF")
 		{
