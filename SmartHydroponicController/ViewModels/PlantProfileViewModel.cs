@@ -154,7 +154,7 @@ public partial class PlantProfileViewModel : ObservableObject
 			PlantRootWaterLevel = "Roots in media",
 			Airflow = "Gentle breeze",
 			WateringScheduleDailyDosingMinutes = 15,
-			WateringScheduleDailyCycle = 4
+			WateringScheduleDailyCycle = 18
 		};
 
 		_profiles.Add(vegetative);
@@ -179,7 +179,7 @@ public partial class PlantProfileViewModel : ObservableObject
 			PlantRootWaterLevel = "Roots in media",
 			Airflow = "Moderate breeze",
 			WateringScheduleDailyDosingMinutes = 15,
-			WateringScheduleDailyCycle = 3
+			WateringScheduleDailyCycle = 14
 		};
 
 		_profiles.Add(flowering);
@@ -203,7 +203,7 @@ public partial class PlantProfileViewModel : ObservableObject
 			PlantRootWaterLevel = "Roots in media",
 			Airflow = "Moderate breeze",
 			WateringScheduleDailyDosingMinutes = 15,
-			WateringScheduleDailyCycle = 2
+			WateringScheduleDailyCycle = 12
 		};
 		_profiles.Add(fruiting);
 		return _profiles;
